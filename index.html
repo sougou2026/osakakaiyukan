@@ -1,44 +1,2745 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SharePointリンク</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>シューティング学習ゲーム Ver.1</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;padding:20px;font-family:system-ui,-apple-system,sans-serif;background:#eaf7f8;color:#173b4b}
-main{max-width:560px;margin:8vh auto;background:#fff;padding:24px;border-radius:18px;box-shadow:0 6px 24px #174b5a18}
-h1{font-size:1.5rem;margin-top:0}label{display:block;font-weight:650;margin:14px 0 6px}
-input{width:100%;padding:12px;border:1px solid #a9cbd0;border-radius:9px;font:inherit}
-button,.link{display:inline-block;border:0;border-radius:10px;padding:12px 16px;background:#087f8c;color:#fff;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;margin-top:16px}
-.msg{color:#a12626;min-height:1.5em}.hidden{display:none}.note{color:#56727b;font-size:.88rem}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:#020817;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
+
+body{
+  min-height:100vh;
+  min-height:100dvh;
+}
+
+button{
+  border:1px solid #4c9cff;
+  border-radius:12px;
+  background:linear-gradient(#12396b,#071a36);
+  color:#fff;
+  font-size:17px;
+  font-weight:bold;
+  padding:12px 20px;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-appearance:none;
+  appearance:none;
+  user-select:none;
+}
+
+button:active{
+  transform:scale(.96);
+}
+
+.space-bg{
+  position:fixed;
+  inset:0;
+  z-index:-10;
+  background:
+    radial-gradient(circle at 50% 40%,#082d62 0%,#03152e 42%,#010611 100%);
+  overflow:hidden;
+}
+
+.space-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(circle,#fff 0 1px,transparent 1.5px),
+    radial-gradient(circle,#8eeaff 0 1px,transparent 1.5px),
+    radial-gradient(circle,#fff 0 1px,transparent 1.5px);
+  background-size:73px 91px,121px 137px,181px 167px;
+  background-position:10px 20px,40px 70px,90px 10px;
+  opacity:.7;
+}
+
+#game-container{
+  width:100%;
+  max-width:900px;
+  margin:auto;
+  padding:10px;
+}
+
+.school{
+  text-align:center;
+  font-size:16px;
+  font-weight:bold;
+  color:#9bdcff;
+  margin:4px 0 8px;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border:1px solid #147cff;
+  border-radius:12px;
+  background:rgba(0,15,40,.8);
+  box-shadow:0 0 18px rgba(0,140,255,.35);
+}
+
+#game-area{
+  position:relative;
+  margin-top:10px;
+}
+
+#problem-card{
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  margin-bottom:8px;
+  padding:10px;
+  border:2px solid #23baff;
+  border-radius:14px;
+  background:rgba(0,24,58,.92);
+  box-shadow:0 0 18px rgba(0,190,255,.5);
+  font-size:20px;
+  font-weight:bold;
+}
+
+canvas{
+  display:block;
+  width:100%;
+  height:400px;
+  border:2px solid #126fff;
+  border-radius:14px;
+  background:#010816;
+  box-shadow:0 0 25px rgba(0,100,255,.45);
+  touch-action:none;
+}
+
+.controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+  margin-top:10px;
+}
+
+.control-btn{
+  width:90px;
+  height:65px;
+  border-radius:50%;
+  font-size:25px;
+  border:2px solid #18d8ff;
+  background:radial-gradient(circle,#087aa8,#031b3c);
+  box-shadow:0 0 20px rgba(0,210,255,.7);
+}
+
+#fire-btn{
+  width:120px;
+  height:70px;
+  border-radius:20px;
+  font-size:20px;
+}
+
+#overlay,
+#child-settings,
+#admin-id-screen,
+#admin-pass-screen,
+#admin-panel,
+#checking-screen,
+#error-screen{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  overflow:auto;
+}
+
+/* ホーム */
+#overlay{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 50% 40%,rgba(0,100,220,.35),transparent 45%),
+    #020817;
+}
+
+.menu{
+  width:min(600px,100%);
+  text-align:center;
+  padding:24px;
+  border:2px solid #168cff;
+  border-radius:20px;
+  background:rgba(2,13,35,.94);
+  box-shadow:0 0 35px rgba(0,140,255,.45);
+}
+
+.menu h1{
+  margin:0 0 20px;
+  font-size:28px;
+}
+
+.menu-section{
+  margin:18px 0;
+}
+
+.menu-section h2{
+  font-size:19px;
+  margin:8px;
+  color:#8edfff;
+}
+
+.menu button{
+  margin:5px;
+}
+
+#home-highscore{
+  margin:12px;
+  font-size:18px;
+  color:#ffd75e;
+}
+
+/* 子供用設定 */
+#child-settings{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 30% 30%,rgba(0,110,255,.35),transparent 40%),
+    #020817;
+}
+
+.settings-box{
+  width:min(600px,100%);
+  padding:25px;
+  text-align:center;
+  border:2px solid #168cff;
+  border-radius:20px;
+  background:rgba(2,13,35,.95);
+}
+
+/* 管理ID */
+#admin-id-screen{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 25% 25%,rgba(0,180,255,.38),transparent 35%),
+    radial-gradient(circle at 80% 75%,rgba(50,70,255,.3),transparent 40%),
+    linear-gradient(135deg,#020b1d,#061f42,#010713);
+}
+
+/* 管理PASS */
+#admin-pass-screen{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at 75% 20%,rgba(160,0,255,.28),transparent 35%),
+    radial-gradient(circle at 20% 80%,rgba(0,210,255,.25),transparent 40%),
+    linear-gradient(135deg,#10031e,#07152f,#010713);
+}
+
+.login-box{
+  width:min(520px,100%);
+  padding:28px;
+  text-align:center;
+  border:2px solid #2b9cff;
+  border-radius:20px;
+  background:rgba(2,9,27,.94);
+  box-shadow:0 0 35px rgba(0,130,255,.5);
+}
+
+#admin-pass-screen .login-box{
+  border-color:#a45cff;
+  box-shadow:0 0 35px rgba(150,60,255,.45);
+}
+
+.login-box input{
+  width:100%;
+  padding:14px;
+  margin:8px 0 15px;
+  border-radius:10px;
+  border:1px solid #5aaeff;
+  background:#020a19;
+  color:#fff;
+  font-size:18px;
+  outline:none;
+}
+
+.login-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+/* 管理画面 */
+#admin-panel{
+  display:none;
+  padding:20px;
+  background:#000;
+  color:#fff;
+}
+
+.admin-inner{
+  width:min(700px,100%);
+  margin:auto;
+}
+
+.admin-inner h1{
+  text-align:center;
+}
+
+.admin-section{
+  margin:16px 0;
+  padding:15px;
+  border:1px solid #555;
+  border-radius:12px;
+}
+
+.admin-section h2{
+  margin-top:0;
+  font-size:18px;
+}
+
+.admin-section button{
+  margin:5px;
+}
+
+.current-score-mode{
+  color:#54d8ff;
+  font-weight:bold;
+}
+
+#admin-highscore{
+  color:#ffd84d;
+  font-size:20px;
+  font-weight:bold;
+}
+
+#error-history{
+  max-height:180px;
+  overflow:auto;
+  white-space:pre-wrap;
+  font-size:13px;
+  color:#ccc;
+}
+
+/* チェッキング */
+#checking-screen{
+  display:none;
+  background:#000;
+  color:#fff;
+  padding:30px 20px;
+}
+
+.checking-inner{
+  width:min(650px,100%);
+  margin:auto;
+}
+
+.checking-inner h1{
+  text-align:center;
+  margin-bottom:35px;
+}
+
+.check-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 10px;
+  border-bottom:1px solid #333;
+  font-size:18px;
+}
+
+.check-result{
+  font-weight:bold;
+}
+
+/* エラー */
+#error-screen{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+  color:#fff;
+  text-align:center;
+  padding:20px;
+}
+
+.error-box h1{
+  color:#ff5555;
+}
+
+.error-code{
+  font-size:28px;
+  font-weight:bold;
+  color:#ff7777;
+}
+
+.error-message{
+  margin:20px 0;
+  font-size:18px;
+}
+
+@media(max-width:600px){
+
+  header{
+    font-size:13px;
+  }
+
+  canvas{
+    height:350px;
+  }
+
+  .menu h1{
+    font-size:23px;
+  }
+
+  .menu{
+    padding:18px 12px;
+  }
+
+  button{
+    font-size:15px;
+    padding:11px 15px;
+  }
+
+  .control-btn{
+    width:75px;
+    height:58px;
+  }
+
+  #fire-btn{
+    width:105px;
+    height:62px;
+  }
+}
 </style>
 </head>
-<body><main>
-<section id="login">
-<h1>🔐 ログイン</h1><p>ユーザーIDとパスワードを入力してください。</p>
-<label for="uid">ユーザーID</label><input id="uid" autocomplete="username">
-<label for="pw">パスワード</label><input id="pw" type="password" autocomplete="current-password">
-<button id="loginBtn" type="button">ログイン</button><p id="msg" class="msg" role="alert"></p>
-</section>
-<section id="destination" class="hidden">
-<h1>📁 リンク</h1><p>ログインしました。下のリンクから共有フォルダーを開いてください。</p>
-<a class="link" href="https://osakacityeducation-my.sharepoint.com/:f:/g/personal/8126436_school_city_osaka_jp/IgAh7lTg_c_6S7Snq_0rblJcAcMVkdzF0tD0-RMamx1-NFQ?e=VUJF2x" target="_blank" rel="noopener noreferrer">SharePointフォルダーを開く ↗</a>
-<p class="note">リンク先で学校アカウントなどのサインインが求められる場合があります。</p>
-<button id="logoutBtn" type="button" style="background:#e1f1f3;color:#164e59">ログアウト</button>
-</section></main>
+
+<body>
+
+<div class="space-bg"></div>
+
+<div id="game-container">
+
+  <div class="school">大阪市立依網小学校</div>
+
+  <header>
+    <span>スコア：<b id="score">0</b></span>
+    <span>残り：<b id="questions-left">10</b></span>
+    <span>コンボ：<b id="combo">0</b></span>
+  </header>
+
+  <div id="game-area">
+
+    <div id="problem-card">
+      ゲームを開始してください
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="controls">
+      <button id="left-btn" class="control-btn">◀</button>
+      <button id="fire-btn">🔥 発射</button>
+      <button id="right-btn" class="control-btn">▶</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ホーム -->
+<div id="overlay">
+
+  <div class="menu">
+
+    <h1>🎮 シューティング学習ゲーム<br>Ver.1</h1>
+
+    <div class="menu-section">
+      <h2>学習モード</h2>
+
+      <button id="idiom-btn">
+        📚 慣用句
+      </button>
+
+      <button id="number-btn">
+        🔢 大きな数
+      </button>
+
+      <button id="addition-btn">
+        ➕ 1桁の足し算
+      </button>
+
+    </div>
+
+    <div class="menu-section">
+      <h2>難易度</h2>
+
+      <button id="easy-btn">
+        かんたん
+      </button>
+
+      <button id="normal-btn">
+        ふつう
+      </button>
+
+      <button id="hard-btn">
+        むずかしい
+      </button>
+
+    </div>
+
+    <div id="home-highscore">
+      ハイスコア：0
+    </div>
+
+    <button id="child-settings-btn">
+      ⚙ 子供用設定
+    </button>
+
+    <button id="admin-btn">
+      ⚙ 管理画面
+    </button>
+
+  </div>
+</div>
+
+
+<!-- 子供用設定 -->
+<div id="child-settings">
+
+  <div class="settings-box">
+
+    <h1>⚙ 子供用設定</h1>
+
+    <p>ゲームデータのバックアップ</p>
+
+    <button id="backup-save-btn">
+      💾 バックアップを保存
+    </button>
+
+    <br><br>
+
+    <button id="backup-restore-btn">
+      📥 バックアップを復元
+    </button>
+
+    <input
+      id="backup-file"
+      type="file"
+      accept=".json,.txt,.bak,application/json,text/plain"
+      style="display:none"
+    >
+
+    <br><br>
+
+    <button id="child-settings-back">
+      ↩ 戻る
+    </button>
+
+  </div>
+</div>
+
+
+<!-- 管理ID入力 -->
+<div id="admin-id-screen">
+
+  <div class="login-box">
+
+    <h1>🔐 管理ID入力</h1>
+
+    <p>管理IDを入力してください</p>
+
+    <input
+      id="admin-id-input"
+      type="text"
+      autocomplete="off"
+      inputmode="text"
+      placeholder="管理ID"
+    >
+
+    <div class="login-buttons">
+
+      <button id="admin-id-next">
+        次へ
+      </button>
+
+      <button id="admin-id-back">
+        ↩ 戻る
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- 管理PASS入力 -->
+<div id="admin-pass-screen">
+
+  <div class="login-box">
+
+    <h1>🔑 管理PASS入力</h1>
+
+    <p>管理パスワードを入力してください</p>
+
+    <input
+      id="admin-pass-input"
+      type="password"
+      autocomplete="off"
+      placeholder="管理PASS"
+    >
+
+    <div class="login-buttons">
+
+      <button id="admin-pass-login">
+        ログイン
+      </button>
+
+      <button id="admin-pass-back">
+        ↩ 戻る
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- 管理画面 -->
+<div id="admin-panel">
+
+  <div class="admin-inner">
+
+    <h1>⚙ 管理画面</h1>
+
+    <div class="admin-section">
+
+      <h2>得点方式</h2>
+
+      <button id="score-10-btn">
+        1問 10点
+      </button>
+
+      <button id="score-1900-btn">
+        1900点方式
+      </button>
+
+      <p>
+        現在：
+        <span
+          id="current-score-mode"
+          class="current-score-mode"
+        >
+          1問 10点
+        </span>
+      </p>
+
+    </div>
+
+    <div class="admin-section">
+
+      <h2>ハイスコア</h2>
+
+      <p id="admin-highscore">0</p>
+
+      <button id="delete-highscore">
+        🗑️ ハイスコアを削除
+      </button>
+
+    </div>
+
+    <div class="admin-section">
+
+      <h2>エラー履歴</h2>
+
+      <div id="error-history">
+        エラー履歴はありません
+      </div>
+
+      <br>
+
+      <button id="delete-error-history">
+        エラー履歴を削除
+      </button>
+
+    </div>
+
+    <div class="admin-section">
+
+      <button id="checking-btn">
+        🔍 チェッキング開始
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- チェッキング -->
+<div id="checking-screen">
+
+  <div class="checking-inner">
+
+    <h1>🔍 チェッキング</h1>
+
+    <div class="check-row">
+      <span>ハイスコア</span>
+      <span id="check-highscore" class="check-result">
+        確認中
+      </span>
+    </div>
+
+    <div class="check-row">
+      <span>キャンバス</span>
+      <span id="check-canvas" class="check-result">
+        確認中
+      </span>
+    </div>
+
+    <div class="check-row">
+      <span>問題生成</span>
+      <span id="check-problem" class="check-result">
+        確認中
+      </span>
+    </div>
+
+    <div class="check-row">
+      <span>得点処理</span>
+      <span id="check-score" class="check-result">
+        確認中
+      </span>
+    </div>
+
+    <div class="check-row">
+      <span>操作</span>
+      <span id="check-operation" class="check-result">
+        確認中
+      </span>
+    </div>
+
+    <div class="check-row">
+      <span>エラー処理</span>
+      <span id="check-error" class="check-result">
+        確認中
+      </span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- エラー -->
+<div id="error-screen">
+
+  <div class="error-box">
+
+    <h1>⚠️ システムエラー</h1>
+
+    <div id="error-code" class="error-code">
+      E000
+    </div>
+
+    <div id="error-message" class="error-message">
+      エラーが発生しました。
+    </div>
+
+    <button id="error-recover">
+      復帰する
+    </button>
+
+  </div>
+</div>
+
+
 <script>
-const accounts = [{"id": "8126436", "password": "@6150027"}, {"id": "686", "password": "752"}, {"id": "5131624", "password": "5131624"}, {"id": "7931055", "password": "7931055"}];
-const loginSection=document.getElementById("login"), destination=document.getElementById("destination");
-document.getElementById("loginBtn").addEventListener("click",()=>{
- const id=document.getElementById("uid").value.trim(), password=document.getElementById("pw").value;
- if(accounts.some(a=>a.id===id && a.password===password)){
-   document.getElementById("msg").textContent="";
-   loginSection.classList.add("hidden"); destination.classList.remove("hidden");
- } else document.getElementById("msg").textContent="ユーザーIDまたはパスワードが違います。";
-});
-document.getElementById("logoutBtn").addEventListener("click",()=>{
- destination.classList.add("hidden"); loginSection.classList.remove("hidden");
- document.getElementById("pw").value="";
-});
-document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("loginBtn").click();});
-</script></body></html>
+"use strict";
+
+/* =========================
+   要素
+========================= */
+
+const canvas =
+  document.getElementById("gameCanvas");
+
+const ctx =
+  canvas.getContext("2d");
+
+const overlay =
+  document.getElementById("overlay");
+
+const childSettings =
+  document.getElementById("child-settings");
+
+const adminIdScreen =
+  document.getElementById("admin-id-screen");
+
+const adminPassScreen =
+  document.getElementById("admin-pass-screen");
+
+const adminPanel =
+  document.getElementById("admin-panel");
+
+const checkingScreen =
+  document.getElementById("checking-screen");
+
+const errorScreen =
+  document.getElementById("error-screen");
+
+const scoreEl =
+  document.getElementById("score");
+
+const questionsLeftEl =
+  document.getElementById("questions-left");
+
+const comboEl =
+  document.getElementById("combo");
+
+const problemCard =
+  document.getElementById("problem-card");
+
+const homeHighscore =
+  document.getElementById("home-highscore");
+
+const adminHighscore =
+  document.getElementById("admin-highscore");
+
+const currentScoreModeEl =
+  document.getElementById("current-score-mode");
+
+
+/* =========================
+   保存
+========================= */
+
+const STORAGE_SCORE =
+  "shootingLearningHighScore";
+
+const STORAGE_MODE =
+  "shootingLearningScoreMode";
+
+let highScore =
+  Number(
+    localStorage.getItem(STORAGE_SCORE) || 0
+  );
+
+let scoreMode =
+  localStorage.getItem(STORAGE_MODE) || "10";
+
+
+/* =========================
+   ゲーム
+========================= */
+
+let gameState = "START";
+
+let selectedMode = null;
+let difficulty = null;
+
+let score = 0;
+let combo = 0;
+let questionsLeft = 10;
+
+let selectedAdminId = null;
+
+let errorHistory = [];
+
+let meteors = [];
+let bullets = [];
+let stars = [];
+
+let animationId = null;
+
+
+/* =========================
+   管理アカウント
+========================= */
+
+const adminAccounts = {
+  "8126436":"@6150027",
+  "HAMASAKA":"8371933",
+  "KOKUGO":"KOKUGO2026"
+};
+
+
+/* =========================
+   プレイヤー
+========================= */
+
+const player = {
+  x:300,
+  y:350,
+  width:42,
+  height:32,
+  speed:7
+};
+
+
+/* =========================
+   慣用句
+========================= */
+
+const idioms = [
+  ["油を売る","仕事をさぼる"],
+  ["頭を冷やす","落ち着く"],
+  ["口が軽い","秘密をすぐ話す"],
+  ["耳を貸す","話を聞く"],
+  ["手を焼く","扱いに困る"],
+  ["目を通す","ざっと見る"],
+  ["気が長い","気持ちに余裕がある"],
+  ["気が短い","すぐ怒る"],
+  ["胸を張る","自信を持つ"],
+  ["力を合わせる","協力する"]
+];
+
+
+/* =========================
+   画面
+========================= */
+
+function hideAllScreens(){
+
+  overlay.style.display="none";
+  childSettings.style.display="none";
+  adminIdScreen.style.display="none";
+  adminPassScreen.style.display="none";
+  adminPanel.style.display="none";
+  checkingScreen.style.display="none";
+  errorScreen.style.display="none";
+}
+
+
+function showHome(){
+
+  hideAllScreens();
+
+  overlay.style.display="flex";
+
+  gameState="START";
+
+  selectedAdminId=null;
+
+  updateHome();
+}
+
+
+function showChildSettings(){
+
+  hideAllScreens();
+
+  childSettings.style.display="flex";
+}
+
+
+function showAdminId(){
+
+  hideAllScreens();
+
+  adminIdScreen.style.display="flex";
+
+  document.getElementById(
+    "admin-id-input"
+  ).value="";
+
+  setTimeout(()=>{
+    document.getElementById(
+      "admin-id-input"
+    ).focus();
+  },50);
+}
+
+
+function showAdminPass(){
+
+  hideAllScreens();
+
+  adminPassScreen.style.display="flex";
+
+  document.getElementById(
+    "admin-pass-input"
+  ).value="";
+
+  setTimeout(()=>{
+    document.getElementById(
+      "admin-pass-input"
+    ).focus();
+  },50);
+}
+
+
+/* =========================
+   ホーム
+========================= */
+
+function updateHome(){
+
+  homeHighscore.textContent =
+    "ハイスコア：" + highScore;
+}
+
+
+/* =========================
+   得点
+========================= */
+
+function updateScoreModeDisplay(){
+
+  currentScoreModeEl.textContent =
+    scoreMode === "1900"
+      ? "1900点方式"
+      : "1問 10点";
+}
+
+
+function setScoreMode(mode){
+
+  scoreMode=mode;
+
+  localStorage.setItem(
+    STORAGE_MODE,
+    scoreMode
+  );
+
+  updateScoreModeDisplay();
+}
+
+
+function getCorrectScore(){
+
+  if(scoreMode==="1900"){
+    return 100+(combo-1)*20;
+  }
+
+  return 10;
+}
+
+
+function updateHUD(){
+
+  scoreEl.textContent=score;
+  comboEl.textContent=combo;
+  questionsLeftEl.textContent=questionsLeft;
+}
+
+
+/* =========================
+   慣用句問題
+========================= */
+
+function makeIdiomProblem(){
+
+  const correct =
+    idioms[
+      Math.floor(
+        Math.random()*idioms.length
+      )
+    ];
+
+  const choices=[correct[1]];
+
+  while(choices.length<3){
+
+    const candidate =
+      idioms[
+        Math.floor(
+          Math.random()*idioms.length
+        )
+      ][1];
+
+    if(!choices.includes(candidate)){
+      choices.push(candidate);
+    }
+  }
+
+  choices.sort(
+    ()=>Math.random()-.5
+  );
+
+  return {
+    question:correct[0],
+    correct:correct[1],
+    choices:choices
+  };
+}
+
+
+/* =========================
+   大きな数
+========================= */
+
+function makeNumberProblem(){
+
+  let max;
+
+  if(difficulty==="easy"){
+    max=90;
+  }else if(difficulty==="normal"){
+    max=900;
+  }else{
+    max=5000;
+  }
+
+  const amounts=[10,100,1000];
+
+  let amount =
+    amounts[
+      Math.floor(
+        Math.random()*amounts.length
+      )
+    ];
+
+  if(amount>max){
+    amount=10;
+  }
+
+  const plus =
+    Math.random()<0.5;
+
+  let base;
+
+  if(plus){
+
+    base =
+      Math.floor(
+        Math.random() *
+        Math.max(
+          1,
+          max-amount+1
+        )
+      );
+
+  }else{
+
+    base =
+      amount +
+      Math.floor(
+        Math.random() *
+        Math.max(
+          1,
+          max-amount+1
+        )
+      );
+  }
+
+  const answer =
+    plus
+      ? base+amount
+      : base-amount;
+
+  const choices=[answer];
+
+  while(choices.length<3){
+
+    let candidate =
+      answer +
+      (Math.floor(
+        Math.random()*9
+      )-4)*amount;
+
+    if(candidate<0){
+      candidate=Math.abs(candidate);
+    }
+
+    if(!choices.includes(candidate)){
+      choices.push(candidate);
+    }
+  }
+
+  choices.sort(
+    ()=>Math.random()-.5
+  );
+
+  return {
+    question:
+      base+
+      (plus?" ＋ ":" － ")+
+      amount+
+      " ＝ ？",
+
+    correct:answer,
+    choices:choices
+  };
+}
+
+
+/* =========================
+   ★ 1桁の足し算
+========================= */
+
+function makeAdditionProblem(){
+
+  /*
+    答えも必ず1桁
+    0〜9の足し算
+  */
+
+  const a =
+    Math.floor(
+      Math.random()*10
+    );
+
+  const b =
+    Math.floor(
+      Math.random()*(10-a)
+    );
+
+  const answer=a+b;
+
+  const choices=[answer];
+
+  while(choices.length<3){
+
+    const candidate =
+      Math.floor(
+        Math.random()*10
+      );
+
+    if(!choices.includes(candidate)){
+      choices.push(candidate);
+    }
+  }
+
+  choices.sort(
+    ()=>Math.random()-.5
+  );
+
+  return {
+    question:
+      a+" ＋ "+b+" ＝ ？",
+
+    correct:answer,
+
+    choices:choices
+  };
+}
+
+
+/* =========================
+   問題生成
+========================= */
+
+function generateProblem(){
+
+  try{
+
+    if(selectedMode==="idiom"){
+      return makeIdiomProblem();
+    }
+
+    if(selectedMode==="number"){
+      return makeNumberProblem();
+    }
+
+    if(selectedMode==="addition"){
+      return makeAdditionProblem();
+    }
+
+    throw new Error();
+
+  }catch(e){
+
+    triggerError(
+      "E004",
+      "問題を生成できませんでした"
+    );
+
+    return null;
+  }
+}
+
+
+/* =========================
+   ゲーム開始
+========================= */
+
+function startGame(){
+
+  try{
+
+    if(!selectedMode || !difficulty){
+      return;
+    }
+
+    score=0;
+    combo=0;
+    questionsLeft=10;
+
+    meteors=[];
+    bullets=[];
+
+    resizeCanvas();
+    createStars();
+
+    player.x=
+      canvas.width/2;
+
+    player.y=
+      canvas.height-50;
+
+    updateHUD();
+
+    nextQuestion();
+
+    hideAllScreens();
+
+    gameState="PLAYING";
+
+    if(!animationId){
+
+      animationId =
+        requestAnimationFrame(
+          gameLoop
+        );
+    }
+
+  }catch(e){
+
+    triggerError(
+      "E005",
+      "ゲームを開始できませんでした"
+    );
+  }
+}
+
+
+/* =========================
+   次の問題
+========================= */
+
+function nextQuestion(){
+
+  if(questionsLeft<=0){
+
+    finishGame();
+    return;
+  }
+
+  const problem =
+    generateProblem();
+
+  if(!problem){
+    return;
+  }
+
+  problemCard.textContent =
+    problem.question;
+
+  meteors =
+    problem.choices.map(
+      (choice,index)=>({
+
+        x:
+          40+
+          Math.random()*
+          Math.max(
+            1,
+            canvas.width-80
+          ),
+
+        y:
+          -60-index*110,
+
+        speed:
+          1.5+
+          Math.random()*1.5,
+
+        radius:27,
+
+        choice:choice,
+
+        correct:
+          choice===problem.correct,
+
+        angle:
+          Math.random()*
+          Math.PI*2,
+
+        rotation:
+          (Math.random()-.5)*.03
+      })
+    );
+}
+
+
+/* =========================
+   Canvas
+========================= */
+
+function resizeCanvas(){
+
+  canvas.width=
+    canvas.clientWidth || 600;
+
+  canvas.height=400;
+
+  player.x=
+    Math.min(
+      player.x || canvas.width/2,
+      canvas.width-25
+    );
+
+  player.y=
+    canvas.height-50;
+}
+
+
+function createStars(){
+
+  stars=[];
+
+  for(let i=0;i<100;i++){
+
+    stars.push({
+
+      x:
+        Math.random()*
+        canvas.width,
+
+      y:
+        Math.random()*
+        canvas.height,
+
+      size:
+        Math.random()*2+.5,
+
+      speed:
+        Math.random()*.7+.2
+    });
+  }
+}
+
+
+function drawStars(){
+
+  ctx.fillStyle="#fff";
+
+  for(const star of stars){
+
+    ctx.globalAlpha=
+      .35+
+      Math.random()*.65;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      star.x,
+      star.y,
+      star.size,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    star.y+=star.speed;
+
+    if(star.y>canvas.height){
+
+      star.y=0;
+
+      star.x=
+        Math.random()*
+        canvas.width;
+    }
+  }
+
+  ctx.globalAlpha=1;
+}
+
+
+function drawPlayer(){
+
+  ctx.save();
+
+  ctx.translate(
+    player.x,
+    player.y
+  );
+
+  ctx.shadowBlur=18;
+  ctx.shadowColor="#00eaff";
+
+  ctx.fillStyle="#0bbcff";
+
+  ctx.beginPath();
+
+  ctx.moveTo(0,-23);
+  ctx.lineTo(-24,18);
+  ctx.lineTo(0,10);
+  ctx.lineTo(24,18);
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.strokeStyle="#c8fbff";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
+function drawMeteor(meteor){
+
+  ctx.save();
+
+  ctx.translate(
+    meteor.x,
+    meteor.y
+  );
+
+  ctx.rotate(
+    meteor.angle
+  );
+
+  ctx.shadowBlur=14;
+  ctx.shadowColor="#ff8a35";
+
+  ctx.fillStyle="#7b3d20";
+  ctx.strokeStyle="#ffad65";
+  ctx.lineWidth=2;
+
+  const r=meteor.radius;
+
+  const points=[
+    [0,-r],
+    [r*.72,-r*.45],
+    [r*.88,r*.4],
+    [r*.25,r],
+    [-r*.65,r*.72],
+    [-r,r*.05],
+    [-r*.75,-r*.65]
+  ];
+
+  ctx.beginPath();
+
+  points.forEach(
+    (p,i)=>{
+
+      if(i===0){
+        ctx.moveTo(
+          p[0],
+          p[1]
+        );
+      }else{
+        ctx.lineTo(
+          p[0],
+          p[1]
+        );
+      }
+    }
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur=0;
+
+  ctx.fillStyle="#fff";
+
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+
+  ctx.font=
+    "bold 14px sans-serif";
+
+  ctx.fillText(
+    String(meteor.choice),
+    0,
+    0
+  );
+
+  ctx.restore();
+}
+
+
+function drawBullets(){
+
+  ctx.fillStyle="#70f6ff";
+
+  ctx.shadowBlur=15;
+  ctx.shadowColor="#00eaff";
+
+  for(const bullet of bullets){
+
+    ctx.beginPath();
+
+    ctx.arc(
+      bullet.x,
+      bullet.y,
+      4,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+  }
+
+  ctx.shadowBlur=0;
+}
+
+
+/* =========================
+   操作
+========================= */
+
+function moveLeft(){
+
+  if(gameState!=="PLAYING"){
+    return;
+  }
+
+  player.x-=player.speed;
+
+  if(player.x<25){
+    player.x=25;
+  }
+}
+
+
+function moveRight(){
+
+  if(gameState!=="PLAYING"){
+    return;
+  }
+
+  player.x+=player.speed;
+
+  if(
+    player.x>
+    canvas.width-25
+  ){
+    player.x=
+      canvas.width-25;
+  }
+}
+
+
+function fire(){
+
+  if(gameState!=="PLAYING"){
+    return;
+  }
+
+  bullets.push({
+
+    x:player.x,
+
+    y:
+      player.y-25,
+
+    speed:9
+  });
+}
+
+
+/* =========================
+   当たり判定
+========================= */
+
+function distance(a,b){
+
+  return Math.hypot(
+    a.x-b.x,
+    a.y-b.y
+  );
+}
+
+
+function answerMeteor(meteor){
+
+  try{
+
+    if(meteor.correct){
+
+      combo++;
+
+      score+=
+        getCorrectScore();
+
+    }else{
+
+      combo=0;
+
+      score=
+        Math.max(
+          0,
+          score-30
+        );
+    }
+
+    questionsLeft--;
+
+    updateHUD();
+
+    if(questionsLeft<=0){
+
+      finishGame();
+
+    }else{
+
+      nextQuestion();
+    }
+
+  }catch(e){
+
+    triggerError(
+      "E007",
+      "得点処理でエラーが発生しました"
+    );
+  }
+}
+
+
+/* =========================
+   更新
+========================= */
+
+function updateGame(){
+
+  for(const bullet of bullets){
+    bullet.y-=bullet.speed;
+  }
+
+  bullets=
+    bullets.filter(
+      bullet=>bullet.y>-20
+    );
+
+
+  for(const meteor of meteors){
+
+    meteor.y+=meteor.speed;
+
+    meteor.angle+=
+      meteor.rotation;
+
+    if(
+      meteor.y>
+      canvas.height+
+      meteor.radius
+    ){
+
+      meteor.y=-50;
+
+      meteor.x=
+        meteor.radius+
+        Math.random()*
+        (
+          canvas.width-
+          meteor.radius*2
+        );
+    }
+  }
+
+
+  for(
+    let bi=bullets.length-1;
+    bi>=0;
+    bi--
+  ){
+
+    const bullet=bullets[bi];
+
+    for(
+      let mi=meteors.length-1;
+      mi>=0;
+      mi--
+    ){
+
+      const meteor=meteors[mi];
+
+      if(
+        distance(
+          bullet,
+          meteor
+        )<
+        meteor.radius+7
+      ){
+
+        bullets.splice(
+          bi,
+          1
+        );
+
+        answerMeteor(
+          meteor
+        );
+
+        return;
+      }
+    }
+  }
+}
+
+
+/* =========================
+   描画
+========================= */
+
+function drawGame(){
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const gradient =
+    ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      canvas.height
+    );
+
+  gradient.addColorStop(
+    0,
+    "#020b20"
+  );
+
+  gradient.addColorStop(
+    .5,
+    "#031936"
+  );
+
+  gradient.addColorStop(
+    1,
+    "#010714"
+  );
+
+  ctx.fillStyle=gradient;
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  drawStars();
+
+  for(const meteor of meteors){
+    drawMeteor(meteor);
+  }
+
+  drawBullets();
+
+  drawPlayer();
+}
+
+
+function gameLoop(){
+
+  animationId=null;
+
+  if(gameState==="PLAYING"){
+
+    updateGame();
+    drawGame();
+
+    animationId=
+      requestAnimationFrame(
+        gameLoop
+      );
+  }
+}
+
+
+/* =========================
+   終了
+========================= */
+
+function finishGame(){
+
+  gameState="START";
+
+  if(score>highScore){
+
+    highScore=score;
+
+    localStorage.setItem(
+      STORAGE_SCORE,
+      String(highScore)
+    );
+  }
+
+  updateHome();
+
+  setTimeout(
+    showHome,
+    500
+  );
+}
+
+
+/* =========================
+   エラー
+========================= */
+
+function triggerError(
+  code,
+  message
+){
+
+  errorHistory.push(
+    new Date().toLocaleString("ja-JP")+
+    " ["+
+    code+
+    "] "+
+    message
+  );
+
+  hideAllScreens();
+
+  document.getElementById(
+    "error-code"
+  ).textContent=code;
+
+  document.getElementById(
+    "error-message"
+  ).textContent=message;
+
+  errorScreen.style.display="flex";
+
+  gameState="ERROR";
+}
+
+
+function recoverFromError(){
+
+  selectedAdminId=null;
+
+  document.getElementById(
+    "admin-id-input"
+  ).value="";
+
+  document.getElementById(
+    "admin-pass-input"
+  ).value="";
+
+  showAdminId();
+}
+
+
+/* =========================
+   管理ログイン
+========================= */
+
+function checkAdminId(){
+
+  const id=
+    document.getElementById(
+      "admin-id-input"
+    ).value.trim();
+
+  if(
+    Object.prototype.hasOwnProperty.call(
+      adminAccounts,
+      id
+    )
+  ){
+
+    selectedAdminId=id;
+
+    showAdminPass();
+
+  }else{
+
+    triggerError(
+      "E001",
+      "管理IDが正しくありません"
+    );
+  }
+}
+
+
+function checkAdminPass(){
+
+  const pass=
+    document.getElementById(
+      "admin-pass-input"
+    ).value;
+
+  if(
+    selectedAdminId &&
+    adminAccounts[selectedAdminId]===pass
+  ){
+
+    document.getElementById(
+      "admin-pass-input"
+    ).value="";
+
+    showAdminPanel();
+
+  }else{
+
+    triggerError(
+      "E002",
+      "管理PASSが正しくありません"
+    );
+  }
+}
+
+
+/* =========================
+   管理画面
+========================= */
+
+function showAdminPanel(){
+
+  hideAllScreens();
+
+  adminPanel.style.display="block";
+
+  updateAdminPanel();
+}
+
+
+function updateAdminPanel(){
+
+  adminHighscore.textContent=
+    highScore;
+
+  updateScoreModeDisplay();
+
+  const history=
+    document.getElementById(
+      "error-history"
+    );
+
+  if(errorHistory.length===0){
+
+    history.textContent=
+      "エラー履歴はありません";
+
+  }else{
+
+    history.textContent=
+      errorHistory.join("\n");
+  }
+}
+
+
+/* =========================
+   バックアップ
+========================= */
+
+function saveBackup(){
+
+  const backup={
+
+    backupType:
+      "shooting-learning-game",
+
+    backupVersion:1,
+
+    createdAt:
+      new Date().toISOString(),
+
+    data:{
+      highScore:highScore,
+      scoreMode:scoreMode
+    }
+  };
+
+  const blob=
+    new Blob(
+      [
+        JSON.stringify(
+          backup,
+          null,
+          2
+        )
+      ],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+  const url=
+    URL.createObjectURL(blob);
+
+  const a=
+    document.createElement("a");
+
+  a.href=url;
+
+  a.download=
+    "shooting-learning-backup.json";
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  a.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+
+function restoreBackupFile(file){
+
+  if(!file){
+    return;
+  }
+
+  const reader=
+    new FileReader();
+
+  reader.onload=function(){
+
+    try{
+
+      const backup=
+        JSON.parse(
+          reader.result
+        );
+
+      if(
+        backup.backupType!==
+        "shooting-learning-game"
+      ){
+        throw new Error();
+      }
+
+      if(
+        !backup.data ||
+        typeof backup.data.highScore!=="number" ||
+        !["10","1900"].includes(
+          String(
+            backup.data.scoreMode
+          )
+        )
+      ){
+        throw new Error();
+      }
+
+      if(
+        !confirm(
+          "バックアップを復元しますか？"
+        )
+      ){
+        return;
+      }
+
+      highScore=
+        Math.max(
+          0,
+          Number(
+            backup.data.highScore
+          )
+        );
+
+      scoreMode=
+        String(
+          backup.data.scoreMode
+        );
+
+      localStorage.setItem(
+        STORAGE_SCORE,
+        String(highScore)
+      );
+
+      localStorage.setItem(
+        STORAGE_MODE,
+        scoreMode
+      );
+
+      updateHome();
+      updateAdminPanel();
+
+      alert(
+        "バックアップを復元しました。"
+      );
+
+    }catch(e){
+
+      triggerError(
+        "E007",
+        "バックアップを復元できませんでした"
+      );
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+
+/* =========================
+   チェッキング
+========================= */
+
+function runChecking(){
+
+  hideAllScreens();
+
+  checkingScreen.style.display="block";
+
+  const checks=[
+
+    [
+      "check-highscore",
+      checkHighScore
+    ],
+
+    [
+      "check-canvas",
+      checkCanvas
+    ],
+
+    [
+      "check-problem",
+      checkProblem
+    ],
+
+    [
+      "check-score",
+      checkScore
+    ],
+
+    [
+      "check-operation",
+      checkOperation
+    ],
+
+    [
+      "check-error",
+      checkError
+    ]
+  ];
+
+  checks.forEach(
+    ([id])=>{
+      document.getElementById(id)
+        .textContent="確認中";
+    }
+  );
+
+  let index=0;
+
+  function next(){
+
+    if(index>=checks.length){
+
+      setTimeout(
+        showHome,
+        700
+      );
+
+      return;
+    }
+
+    const [id,fn]=
+      checks[index];
+
+    let result=false;
+
+    try{
+      result=fn();
+    }catch(e){
+      result=false;
+    }
+
+    document.getElementById(id)
+      .textContent=
+        result
+          ? "OK"
+          : "確認できません";
+
+    index++;
+
+    setTimeout(
+      next,
+      350
+    );
+  }
+
+  next();
+}
+
+
+function checkHighScore(){
+
+  return(
+    typeof highScore==="number" &&
+    highScore>=0
+  );
+}
+
+
+function checkCanvas(){
+
+  return !!(
+    canvas &&
+    ctx &&
+    canvas.width>0 &&
+    canvas.height>0
+  );
+}
+
+
+function checkProblem(){
+
+  try{
+
+    const oldMode=
+      selectedMode;
+
+    selectedMode="addition";
+
+    const p=
+      makeAdditionProblem();
+
+    selectedMode=
+      oldMode;
+
+    return !!(
+      p &&
+      p.question &&
+      typeof p.correct==="number" &&
+      p.choices.length===3
+    );
+
+  }catch(e){
+
+    return false;
+  }
+}
+
+
+function checkScore(){
+
+  const oldCombo=combo;
+
+  combo=1;
+
+  const result=
+    getCorrectScore();
+
+  combo=oldCombo;
+
+  return typeof result==="number";
+}
+
+
+function checkOperation(){
+
+  return(
+    typeof moveLeft==="function" &&
+    typeof moveRight==="function" &&
+    typeof fire==="function"
+  );
+}
+
+
+function checkError(){
+
+  return(
+    typeof triggerError==="function" &&
+    typeof recoverFromError==="function"
+  );
+}
+
+
+/* =========================
+   ホームボタン
+========================= */
+
+document.getElementById(
+  "idiom-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    selectedMode="idiom";
+  }
+);
+
+
+document.getElementById(
+  "number-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    selectedMode="number";
+  }
+);
+
+
+/* ★ 1桁足し算 */
+
+document.getElementById(
+  "addition-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    selectedMode="addition";
+  }
+);
+
+
+document.getElementById(
+  "easy-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    if(!selectedMode)return;
+
+    difficulty="easy";
+
+    startGame();
+  }
+);
+
+
+document.getElementById(
+  "normal-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    if(!selectedMode)return;
+
+    difficulty="normal";
+
+    startGame();
+  }
+);
+
+
+document.getElementById(
+  "hard-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    if(!selectedMode)return;
+
+    difficulty="hard";
+
+    startGame();
+  }
+);
+
+
+/* =========================
+   子供用設定
+========================= */
+
+document.getElementById(
+  "child-settings-btn"
+).addEventListener(
+  "click",
+  showChildSettings
+);
+
+
+document.getElementById(
+  "child-settings-back"
+).addEventListener(
+  "click",
+  showHome
+);
+
+
+document.getElementById(
+  "backup-save-btn"
+).addEventListener(
+  "click",
+  saveBackup
+);
+
+
+document.getElementById(
+  "backup-restore-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    document.getElementById(
+      "backup-file"
+    ).click();
+  }
+);
+
+
+document.getElementById(
+  "backup-file"
+).addEventListener(
+  "change",
+  function(){
+
+    restoreBackupFile(
+      this.files[0]
+    );
+
+    this.value="";
+  }
+);
+
+
+/* =========================
+   管理
+========================= */
+
+document.getElementById(
+  "admin-btn"
+).addEventListener(
+  "click",
+  showAdminId
+);
+
+
+document.getElementById(
+  "admin-id-next"
+).addEventListener(
+  "click",
+  checkAdminId
+);
+
+
+document.getElementById(
+  "admin-id-back"
+).addEventListener(
+  "click",
+  showHome
+);
+
+
+document.getElementById(
+  "admin-pass-login"
+).addEventListener(
+  "click",
+  checkAdminPass
+);
+
+
+document.getElementById(
+  "admin-pass-back"
+).addEventListener(
+  "click",
+  showAdminId
+);
+
+
+/* Enter */
+
+document.getElementById(
+  "admin-id-input"
+).addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter"){
+      checkAdminId();
+    }
+  }
+);
+
+
+document.getElementById(
+  "admin-pass-input"
+).addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter"){
+      checkAdminPass();
+    }
+  }
+);
+
+
+/* 得点方式 */
+
+document.getElementById(
+  "score-10-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    setScoreMode("10");
+  }
+);
+
+
+document.getElementById(
+  "score-1900-btn"
+).addEventListener(
+  "click",
+  ()=>{
+    setScoreMode("1900");
+  }
+);
+
+
+/* ハイスコア */
+
+document.getElementById(
+  "delete-highscore"
+).addEventListener(
+  "click",
+  ()=>{
+
+    if(
+      confirm(
+        "ハイスコアを削除しますか？"
+      )
+    ){
+
+      highScore=0;
+
+      localStorage.setItem(
+        STORAGE_SCORE,
+        "0"
+      );
+
+      updateAdminPanel();
+      updateHome();
+    }
+  }
+);
+
+
+/* エラー履歴 */
+
+document.getElementById(
+  "delete-error-history"
+).addEventListener(
+  "click",
+  ()=>{
+
+    errorHistory=[];
+
+    updateAdminPanel();
+  }
+);
+
+
+/* チェッキング */
+
+document.getElementById(
+  "checking-btn"
+).addEventListener(
+  "click",
+  runChecking
+);
+
+
+/* エラー復帰 */
+
+document.getElementById(
+  "error-recover"
+).addEventListener(
+  "click",
+  recoverFromError
+);
+
+
+/* =========================
+   ゲーム操作
+========================= */
+
+document.getElementById(
+  "left-btn"
+).addEventListener(
+  "click",
+  moveLeft
+);
+
+
+document.getElementById(
+  "right-btn"
+).addEventListener(
+  "click",
+  moveRight
+);
+
+
+document.getElementById(
+  "fire-btn"
+).addEventListener(
+  "click",
+  fire
+);
+
+
+/* =========================
+   キーボード
+========================= */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(gameState!=="PLAYING"){
+      return;
+    }
+
+    if(e.key==="ArrowLeft"){
+
+      e.preventDefault();
+      moveLeft();
+
+    }else if(e.key==="ArrowRight"){
+
+      e.preventDefault();
+      moveRight();
+
+    }else if(e.code==="Space"){
+
+      e.preventDefault();
+      fire();
+    }
+  }
+);
+
+
+/* =========================
+   リサイズ
+========================= */
+
+window.addEventListener(
+  "resize",
+  ()=>{
+    resizeCanvas();
+
+    if(stars.length){
+      createStars();
+    }
+  }
+);
+
+
+/* =========================
+   初期化
+========================= */
+
+updateHome();
+updateScoreModeDisplay();
+
+resizeCanvas();
+createStars();
+
+drawGame();
+
+</script>
+
+</body>
+</html>
